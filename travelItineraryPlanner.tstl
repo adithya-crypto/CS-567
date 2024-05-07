@@ -1,0 +1,80 @@
+# Importing TSTL
+import tstl
+
+# Creating a Test Harness
+harness = tstl.TestHarness()
+
+# Adding the Code Under Test (CUT)
+harness.add_dependency('code_under_test.py')
+
+# Testing Destination Class
+@harness.test
+def test_destination_functionality(tst):
+    # Initialize a destination
+    dest = Destination("Paris", ["Eiffel Tower", "Louvre Museum"])
+
+    # Test adding an attraction
+    dest.add_attraction("Notre-Dame Cathedral")
+    tst.assert_in("Notre-Dame Cathedral", dest.list_attractions())
+
+    # Test removing an attraction
+    dest.remove_attraction("Eiffel Tower")
+    tst.assert_not_in("Eiffel Tower", dest.list_attractions())
+
+    # Test updating attractions
+    new_attractions = ["Arc de Triomphe", "Versailles Palace"]
+    dest.update_attractions(new_attractions)
+    tst.assert_equal(new_attractions, dest.list_attractions())
+
+# Testing Accommodation Class
+@harness.test
+def test_accommodation_functionality(tst):
+    # Initialize an accommodation
+    acc = Accommodation("Hotel ABC", "City Center", ["Single", "Double", "Suite"], {"Single": 10, "Double": 5, "Suite": 2})
+
+    # Test booking a room
+    booking_info = acc.book_room("Single", "2024-07-01", "2024-07-05")
+    tst.assert_equal(booking_info, "Booked Single at Hotel ABC from 2024-07-01 to 2024-07-05")
+
+    # Test checking availability
+    tst.assert_equal(acc.check_availability("Single"), 9)
+
+    # Test modifying availability
+    acc.modify_availability("Single", 8)
+    tst.assert_equal(acc.check_availability("Single"), 8)
+
+# Testing Itinerary Class
+@harness.test
+def test_itinerary_functionality(tst):
+    # Initialize an itinerary
+    itinerary = Itinerary("2024-07-01", "2024-07-10")
+
+    # Test adding destinations
+    dest1 = Destination("Paris", ["Eiffel Tower", "Louvre Museum"])
+    dest2 = Destination("Rome", ["Colosseum", "Vatican City"])
+    itinerary.add_destination(dest1)
+    itinerary.add_destination(dest2)
+    tst.assert_in("Paris", [dest.name for dest in itinerary.destinations])
+
+    # Test adding bookings
+    acc = Accommodation("Hotel ABC", "City Center", ["Single", "Double", "Suite"], {"Single": 10, "Double": 5, "Suite": 2})
+    itinerary.add_booking(acc, "Single", "2024-07-01", "2024-07-05")
+    tst.assert_equal(len(itinerary.bookings), 1)
+
+# Testing TravelPlanner Class
+@harness.test
+def test_travel_planner_functionality(tst):
+    # Initialize a travel planner
+    planner = TravelPlanner()
+
+    # Test adding destination and accommodation
+    planner.add_destination("Paris", ["Eiffel Tower", "Louvre Museum"])
+    planner.add_accommodation("Hotel ABC", "City Center", ["Single", "Double", "Suite"], {"Single": 10, "Double": 5, "Suite": 2})
+
+    # Test planning a trip
+    itinerary_details = planner.plan_trip("2024-07-01", "2024-07-10", ["Paris"], [("Hotel ABC", "Single", "2024-07-01", "2024-07-05")])
+    tst.assert_equal(len(itinerary_details['Destinations']), 1)
+    tst.assert_equal(len(itinerary_details['Bookings']), 1)
+
+# Running the Test Harness
+harness.run()
